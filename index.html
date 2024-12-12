@@ -147,7 +147,7 @@
         const tibiaInputContainer = document.getElementById('tibiaInputContainer');
         
         if (tibiaSwitch.checked) {
-            tibiaInputContainer.innerHTML = `
+            tibiaInputContainer.innerHTML = `  
                 <select id="sexDropdown">
                     <option value="" disabled selected>Select your biological sex</option>
                     <option value="male">Male</option>
@@ -183,19 +183,30 @@
         }
     }
 
+    // Manually define an array of bicycles with name, pedal radius (r), and price
+    const bicycles = [
+        { name: 'Jett 16 Superspeed', pedalRadius: 9.5, price: 250 },
+        { name: 'Jett 20 Superspeed', pedalRadius: 11.5, price: 200 },
+        { name: 'Ozark Trail 700C G.1 Explorer', pedalRadius: 17, price: 248 },
+        { name: 'Nishiki Boys Pueblo 1.1 20" Mountain Bike', pedalRadius: 14, price: 150 },
+		{ name: '26" Kent Bayside', pedalRadius: 16.5, price: 250 },
+		{ name: '20" Ozone 500', pedalRadius: 14, price: 150 },
+		{ name: 'The Mountain Bicycle', pedalRadius: 17.5, price: 500},
+		{ name: 'The Lifestyle Bicycle', pedalRadius: 16.5, price: 429}
+    ];
+
     // Function to optimize bicycle (handle inputs)
     function optimizeBicycle() {
         // Collecting all inputs
         let tibiaLength = '';
-		let tswitch = true;
-		let male = true;
+        let tswitch = true;
+        let male = true;
         if (document.getElementById('tibiaSwitch').checked) {
-			tswitch = false;
+            tswitch = false;
             tibiaLength = document.getElementById('sexDropdown') ? document.getElementById('sexDropdown').value : '';
-			if(tibiaLength == "female")
-			{	
-				male = false;
-			}
+            if(tibiaLength == "female") {  
+                male = false;
+            }
         } else {
             tibiaLength = document.getElementById('tibiaLength').value;
         }
@@ -203,15 +214,15 @@
         const height = document.getElementById('height').value;
         
         let wattage = '';
-		let wswitch = true;
-		let mileTime = 0;
-		let weight = 0;
+        let wswitch = true;
+        let mileTime = 0;
+        let weight = 0;
         if (document.getElementById('wattageSwitch').checked) {
-			wswitch = false;
+            wswitch = false;
             wattage = document.getElementById('mileMinutes') ? document.getElementById('mileMinutes').value : '';
-			mileTime += Number(wattage*60);
-			mileTime += Number(document.getElementById('mileSeconds') ? document.getElementById('mileSeconds').value : '');
-			weight = document.getElementById('weight') ? document.getElementById('weight').value : '';
+            mileTime += Number(wattage * 60);
+            mileTime += Number(document.getElementById('mileSeconds') ? document.getElementById('mileSeconds').value : '');
+            weight = document.getElementById('weight') ? document.getElementById('weight').value : '';
         } else {
             wattage = document.getElementById('wattage').value;
         }
@@ -223,8 +234,6 @@
             alert("Please fill out all required fields.");
             return;
         }
-
-        // Prepare result message
 		if(!tswitch)
 		{
 			if(male)
@@ -241,15 +250,34 @@
 			vo2 /= parseFloat(0.8+0.1894343*Math.pow(2.71828, -0.012778*mileTime/60)+0.2989558*Math.pow(2.71828, -0.1932605*mileTime/60));
 			wattage = parseFloat((vo2-7)*weight/23.76);
 		}
-		let r = parseFloat(parseFloat(0.41*tibiaLength+0.095*height)/2);
-		let seatHeight = parseFloat(0.4836*height+parseFloat((tibiaLength-0.4167(height-85))/2));
-		let mechAdvantage = parseFloat(0.0843*height*r/wattage+1.54);
+        // Calculate r (pedal radius)
+        let r = parseFloat((0.41 * tibiaLength + 0.095 * height) / 2);
+        let seatHeight = parseFloat(0.4836 * height + (tibiaLength - 0.4167 * (height - 85)) / 2);
+        let mechAdvantage = parseFloat(0.0843 * height * r / wattage + 1.54);
+
+        // Evaluate bicycles based on pedal radius and budget
+        let bestBike = null;
+        let highestScore = -Infinity;
+
+        bicycles.forEach(bike => {
+            let bikeScore = (1 - ((bike.pedalRadius-r)*(bike.pedalRadius-r) / r*r))*Math.log(budget/bike.price);
+            if (bikeScore > highestScore) {
+                highestScore = bikeScore;
+                bestBike = bike;
+            }
+        });
+
+        // Prepare result message
         const resultMessage = `
-            Recommended Seat Height: ${seatHeight}, Recommended Mechanical Advantage: ${mechAdvantage}, Power Output: ${wattage}, Budget: ${budget}
+            Recommended Seat Height: ${seatHeight} cm<br>
+            Recommended Mechanical Advantage: ${mechAdvantage}<br>
+            Best Bicycle: ${bestBike ? bestBike.name : 'No suitable bike found'}<br>
+            Price: $${bestBike ? bestBike.price : 'N/A'}<br>
+			Pedal Radius: ${bestBike ? bestBike.pedalRadius : 'N/A'}
         `;
 
         // Display the result
-        document.getElementById('resultText').innerText = resultMessage;
+        document.getElementById('resultText').innerHTML = resultMessage;
         document.getElementById('result').style.display = 'block';  // Show result section
     }
 </script>
