@@ -51,6 +51,13 @@
         .slider.round:before {
             border-radius: 50%;
         }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            display: none; /* Initially hidden */
+        }
     </style>
 </head>
 <body class="is-preload">
@@ -82,7 +89,7 @@
                     </div>
                     <br />
                     <label class="switch">
-                        <input type="checkbox" id="tibiaSwitch" onchange="toggleTibiaInput()" />
+                        <input type="checkbox" id="tibiaSwitch" onchange="toggleTibiaSwitch()" />
                         <span class="slider round"></span>
                     </label>
                     <label for="tibiaSwitch">Don't know tibia length?</label>
@@ -98,7 +105,7 @@
                     </div>
                     <br />
                     <label class="switch">
-                        <input type="checkbox" id="wattageSwitch" onchange="toggleWattageInput()" />
+                        <input type="checkbox" id="wattageSwitch" onchange="toggleWattageSwitch()" />
                         <span class="slider round"></span>
                     </label>
                     <label for="wattageSwitch">Don't know wattage?</label>
@@ -115,6 +122,12 @@
             </footer>
         </section>
 
+        <!-- Result Section -->
+        <section id="result" class="special">
+            <h3>Optimization Result</h3>
+            <p id="resultText"></p> <!-- Where the result will be displayed -->
+        </section>
+
     </div>
 
 </div>
@@ -128,11 +141,11 @@
 <script src="assets/js/util.js"></script>
 <script src="assets/js/main.js"></script>
 <script>
-    // Function to toggle between tibia length input and biological sex dropdown
-    function toggleTibiaInput() {
+    // Function to handle tibia switch change
+    function toggleTibiaSwitch() {
         const tibiaSwitch = document.getElementById('tibiaSwitch');
         const tibiaInputContainer = document.getElementById('tibiaInputContainer');
-
+        
         if (tibiaSwitch.checked) {
             tibiaInputContainer.innerHTML = `
                 <select id="sexDropdown">
@@ -148,11 +161,11 @@
         }
     }
 
-    // Function to toggle between wattage input and mile time + weight inputs
-    function toggleWattageInput() {
+    // Function to handle wattage switch change
+    function toggleWattageSwitch() {
         const wattageSwitch = document.getElementById('wattageSwitch');
         const wattageInputContainer = document.getElementById('wattageInputContainer');
-
+        
         if (wattageSwitch.checked) {
             wattageInputContainer.innerHTML = `
                 <h4>Fastest Mile Time</h4>
@@ -165,7 +178,7 @@
             `;
         } else {
             wattageInputContainer.innerHTML = `
-                <input type="text" placeholder="Enter your average cycling wattage" />
+                <input type="text" placeholder="Enter your average cycling wattage" id="wattage" />
             `;
         }
     }
@@ -173,27 +186,71 @@
     // Function to optimize bicycle (handle inputs)
     function optimizeBicycle() {
         // Collecting all inputs
-        const tibiaLength = document.getElementById('tibiaLength') ? document.getElementById('tibiaLength').value : '';
+        let tibiaLength = '';
+		let tswitch = true;
+		let male = true;
+        if (document.getElementById('tibiaSwitch').checked) {
+			tswitch = false;
+            tibiaLength = document.getElementById('sexDropdown') ? document.getElementById('sexDropdown').value : '';
+			if(tibiaLength == "female")
+			{	
+				male = false;
+			}
+        } else {
+            tibiaLength = document.getElementById('tibiaLength').value;
+        }
+        
         const height = document.getElementById('height').value;
-        const wattage = document.getElementById('wattage') ? document.getElementById('wattage').value : '';
+        
+        let wattage = '';
+		let wswitch = true;
+		let mileTime = 0;
+		let weight = 0;
+        if (document.getElementById('wattageSwitch').checked) {
+			wswitch = false;
+            wattage = document.getElementById('mileMinutes') ? document.getElementById('mileMinutes').value : '';
+			mileTime += Number(wattage*60);
+			mileTime += Number(document.getElementById('mileSeconds') ? document.getElementById('mileSeconds').value : '');
+			weight = document.getElementById('weight') ? document.getElementById('weight').value : '';
+        } else {
+            wattage = document.getElementById('wattage').value;
+        }
+        
         const budget = document.getElementById('budget').value;
 
-        // Handling conditional inputs from switches
-        let tibia = tibiaLength || (document.getElementById('sexDropdown') && document.getElementById('sexDropdown').value);
-        let powerOutput = wattage || (document.getElementById('mileMinutes') && document.getElementById('mileMinutes').value);
-
         // Validation: Check if required fields are filled
-        if (!tibia || !height || !powerOutput || !budget) {
+        if (!tibiaLength || !height || !wattage || !budget) {
             alert("Please fill out all required fields.");
             return;
         }
 
-        // Simulated optimization result (for now just logs values)
-        const result = `
-            Tibia: ${tibia}, Height: ${height}, Power Output: ${powerOutput}, Budget: ${budget}
+        // Prepare result message
+		if(!tswitch)
+		{
+			if(male)
+			{
+				tibiaLength = parseFloat(parseFloat(height-86.35)/2.415);
+			}
+			else{
+				tibiaLength = parseFloat(parseFloat(height-84.16)/2.301);
+			}
+		}
+		if(!wswitch)
+		{
+			let vo2 = parseFloat(-4.6 + 4.88755811*60*60/mileTime + 3600*0.07479*60*60/mileTime/mileTime);
+			vo2 /= parseFloat(0.8+0.1894343*Math.pow(2.71828, -0.012778*mileTime/60)+0.2989558*Math.pow(2.71828, -0.1932605*mileTime/60));
+			wattage = parseFloat((vo2-7)*weight/23.76);
+		}
+		let r = parseFloat(parseFloat(0.41*tibiaLength+0.095*height)/2);
+		let seatHeight = parseFloat(0.4836*height+parseFloat((tibiaLength-0.4167(height-85))/2));
+		let mechAdvantage = parseFloat(0.0843*height*r/wattage+1.54);
+        const resultMessage = `
+            Recommended Seat Height: ${seatHeight}, Recommended Mechanical Advantage: ${mechAdvantage}, Power Output: ${wattage}, Budget: ${budget}
         `;
 
-        alert("Optimization Result: " + result);
+        // Display the result
+        document.getElementById('resultText').innerText = resultMessage;
+        document.getElementById('result').style.display = 'block';  // Show result section
     }
 </script>
 
