@@ -1,1 +1,201 @@
-"Hello World" 
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Bicycle Optimization</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+    <style>
+        /* Styling for the switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .slider.round {
+            border-radius: 34px;
+        }
+        .slider.round:before {
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="is-preload">
+
+<!-- Wrapper -->
+<div id="wrapper">
+
+    <!-- Nav -->
+    <nav id="nav">
+        <ul>
+            <li><a class="active">First Semester Multivariable Project</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main -->
+    <div id="main">
+
+        <!-- First Section -->
+        <section id="first" class="main special">
+            <header class="major">
+                <h2>Bicycle Optimization</h2>
+                <h3>by Eric Chen</h3>    
+            </header>
+            <ul class="features">
+                <li>
+                    <h3>Tibia Length (cm)</h3>
+                    <div id="tibiaInputContainer">
+                        <input type="text" placeholder="Enter your tibia length in centimeters" id="tibiaLength" />
+                    </div>
+                    <br />
+                    <label class="switch">
+                        <input type="checkbox" id="tibiaSwitch" onchange="toggleTibiaInput()" />
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="tibiaSwitch">Don't know tibia length?</label>
+                </li>
+                <li>
+                    <h3>Height (cm)</h3>
+                    <input type="text" placeholder="Enter your height in centimeters" id="height" />
+                </li>
+                <li>
+                    <h3>Power Output (W)</h3>
+                    <div id="wattageInputContainer">
+                        <input type="text" placeholder="Enter your average cycling wattage" id="wattage" />
+                    </div>
+                    <br />
+                    <label class="switch">
+                        <input type="checkbox" id="wattageSwitch" onchange="toggleWattageInput()" />
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="wattageSwitch">Don't know wattage?</label>
+                </li>
+                <li>
+                    <h3>Budget (USD)</h3>
+                    <input type="text" placeholder="Enter your budget in USD" id="budget" />
+                </li>
+            </ul>
+            <footer class="major">
+                <ul class="actions special">
+                    <li><button class="button" onclick="optimizeBicycle()">Optimize Bicycle</button></li>
+                </ul>
+            </footer>
+        </section>
+
+    </div>
+
+</div>
+
+<!-- Scripts -->
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/jquery.scrollex.min.js"></script>
+<script src="assets/js/jquery.scrolly.min.js"></script>
+<script src="assets/js/browser.min.js"></script>
+<script src="assets/js/breakpoints.min.js"></script>
+<script src="assets/js/util.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+    // Function to toggle between tibia length input and biological sex dropdown
+    function toggleTibiaInput() {
+        const tibiaSwitch = document.getElementById('tibiaSwitch');
+        const tibiaInputContainer = document.getElementById('tibiaInputContainer');
+
+        if (tibiaSwitch.checked) {
+            tibiaInputContainer.innerHTML = `
+                <select id="sexDropdown">
+                    <option value="" disabled selected>Select your biological sex</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            `;
+        } else {
+            tibiaInputContainer.innerHTML = `
+                <input type="text" placeholder="Enter your tibia length in centimeters" id="tibiaLength" />
+            `;
+        }
+    }
+
+    // Function to toggle between wattage input and mile time + weight inputs
+    function toggleWattageInput() {
+        const wattageSwitch = document.getElementById('wattageSwitch');
+        const wattageInputContainer = document.getElementById('wattageInputContainer');
+
+        if (wattageSwitch.checked) {
+            wattageInputContainer.innerHTML = `
+                <h4>Fastest Mile Time</h4>
+                <div style="display: flex; justify-content: space-between; gap: 8px;">
+                    <input type="text" placeholder="Minutes" id="mileMinutes" style="width: 48%;" />
+                    <input type="text" placeholder="Seconds" id="mileSeconds" style="width: 48%;" />
+                </div>
+                <h4>Weight (lbs)</h4>
+                <input type="text" placeholder="Enter your weight in pounds" id="weight" />
+            `;
+        } else {
+            wattageInputContainer.innerHTML = `
+                <input type="text" placeholder="Enter your average cycling wattage" />
+            `;
+        }
+    }
+
+    // Function to optimize bicycle (handle inputs)
+    function optimizeBicycle() {
+        // Collecting all inputs
+        const tibiaLength = document.getElementById('tibiaLength') ? document.getElementById('tibiaLength').value : '';
+        const height = document.getElementById('height').value;
+        const wattage = document.getElementById('wattage') ? document.getElementById('wattage').value : '';
+        const budget = document.getElementById('budget').value;
+
+        // Handling conditional inputs from switches
+        let tibia = tibiaLength || (document.getElementById('sexDropdown') && document.getElementById('sexDropdown').value);
+        let powerOutput = wattage || (document.getElementById('mileMinutes') && document.getElementById('mileMinutes').value);
+
+        // Validation: Check if required fields are filled
+        if (!tibia || !height || !powerOutput || !budget) {
+            alert("Please fill out all required fields.");
+            return;
+        }
+
+        // Simulated optimization result (for now just logs values)
+        const result = `
+            Tibia: ${tibia}, Height: ${height}, Power Output: ${powerOutput}, Budget: ${budget}
+        `;
+
+        alert("Optimization Result: " + result);
+    }
+</script>
+
+</body>
+</html>
